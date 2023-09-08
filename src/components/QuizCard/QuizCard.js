@@ -1,6 +1,6 @@
 import { Text, Topic, Wrapper } from "./QuizCard.styled";
 
-export const QuizCard = ({ item: { topic, level, time, questions } }) => {
+export const QuizCard = ({ item: {id,  topic, level, time, questions }, onClick }) => {
   return (
     <Wrapper>
       <Topic>{topic}</Topic>
@@ -13,6 +13,10 @@ export const QuizCard = ({ item: { topic, level, time, questions } }) => {
       <p>
         <b>Questions:</b> {questions}
       </p>
+      <div>
+        <button onClick={() => onClick(id)}>Delete</button>
+        {/* <button onClick={onClick}>Delete</button> */}
+      </div>
     </Wrapper>
   );
 };

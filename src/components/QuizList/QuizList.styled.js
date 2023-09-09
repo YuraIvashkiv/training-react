@@ -31,6 +31,8 @@ const getBorderColor = ({level, theme}) => {
 export const ListItem = styled.li`
   border: 5px solid ${getBorderColor};
      border-radius: 4px; 
+
+  
   
   /* :hover {
     background-color: red;

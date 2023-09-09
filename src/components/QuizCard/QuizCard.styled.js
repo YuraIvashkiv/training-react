@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 
 export const Wrapper = styled.div`
-padding: 8px;
+  padding: 8px;
+  border-radius: 4px;
 `;
 
 export const Topic = styled.h2`

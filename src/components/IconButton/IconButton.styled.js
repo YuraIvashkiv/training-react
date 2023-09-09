@@ -29,6 +29,7 @@ export const Button = styled.button`
   color: ${props => (props.variant === 'primary' ? 'red' : 'blue')};
 
   svg {
+    display: block;
     width: 100%;
     height: 100%;
   }

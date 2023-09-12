@@ -8,6 +8,7 @@ import { QuizForm } from './QuizForm/QuizForm';
 // import { HiAcademicCap, HiAdjustments, HiArchive } from 'react-icons/hi';
 // import { IconButton } from './IconButton/IconButton';
 
+// Монтує-> Розмонтовує-> Монтує
 export class App extends Component {
   state = {
     quizItems: initialQuizItems,
@@ -16,6 +17,33 @@ export class App extends Component {
       level: 'all',
     },
   };
+
+  componentDidMount() { 
+    console.log('componentDidMount');
+    const savedFilters = localStorage.getItem('quizFilters');
+    if (savedFilters !== null) {
+      JSON.parse(savedFilters);
+      this.setState({
+        filters: JSON.parse(savedFilters),
+      })
+    };
+ };
+
+  componentDidUpdate(prevProps, prevState) { 
+    if (prevState.filters !== this.state.filters) {
+  localStorage.setItem('quizFilters', JSON.stringify(this.state.filters));
+      
+    }
+  };
+
+  resetFilters = () => {
+    this.setState({
+      filters: {
+        topic: '',
+        level: 'all',
+      },
+    });
+  }
 
   changeTopicFilter = newTopic => {
     this.setState(prevState => {
@@ -75,6 +103,7 @@ export class App extends Component {
          
   }
   render() {
+    console.log('render')
     const { filters } = this.state;
 
     const visibleQuizItems = this.getVisibleQuizItems();
@@ -85,6 +114,7 @@ export class App extends Component {
           levelFilter={filters.level}
           onChangeTopic={this.changeTopicFilter}
           onChangeLevel={this.changeLevelFilter}
+          onReset={this.resetFilters}
         />
         <QuizForm onAdd={this.addQuiz} />
         <QuizList items={visibleQuizItems} onDelete={this.handleDelete} />

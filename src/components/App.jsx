@@ -1,25 +1,26 @@
 import { QuizList } from './QuizList/QuizList';
-import initialQuizItems from '../data.json';
 import { SearchBar } from './SearchBar/SearchBar';
 import { GlobalStyle } from './GlobalStyle';
 import { Layout } from './Layout';
 import { Component } from 'react';
 import { QuizForm } from './QuizForm/QuizForm';
+import { createQuiz, deleteQuiz, fetchQuizzes } from 'api';
 // import { HiAcademicCap, HiAdjustments, HiArchive } from 'react-icons/hi';
 // import { IconButton } from './IconButton/IconButton';
 
 // Монтує-> Розмонтовує-> Монтує
 export class App extends Component {
   state = {
-    quizItems: initialQuizItems,
+    quizItems: [],
     filters: {
       topic: '',
       level: 'all',
+      loading: false
     },
   };
 
-  componentDidMount() { 
-    console.log('componentDidMount');
+  async componentDidMount() { 
+    // console.log('componentDidMount');
     const savedFilters = localStorage.getItem('quizFilters');
     if (savedFilters !== null) {
       JSON.parse(savedFilters);
@@ -27,7 +28,14 @@ export class App extends Component {
         filters: JSON.parse(savedFilters),
       })
     };
- };
+try {
+   this.setState({ loading: true });
+   const quizItems = await fetchQuizzes();
+   this.setState({ quizItems, loading: false, });
+} catch (error) {
+  console.log(error)
+} 
+};
 
   componentDidUpdate(prevProps, prevState) { 
     if (prevState.filters !== this.state.filters) {
@@ -64,22 +72,31 @@ export class App extends Component {
     });
   };
 
-  handleDelete = quizId => {
-    this.setState(prevState => {
-      return {
-        quizItems: prevState.quizItems.filter(quiz => quiz.id !== quizId),
-      };
-    });
+  handleDelete = async quizId => {
+    try {
+       const deletedQuiz = await deleteQuiz(quizId);
+
+       this.setState(prevState => ({
+           quizItems: prevState.quizItems.filter(
+             quiz => quiz.id !== deletedQuiz.id
+           ),
+         }));
+    } catch (error) {
+      console.log(error)
+    }
+   
   };
 
-  addQuiz = newQuiz => {
-    // console.log(newQuiz);
-
-    this.setState(prevState => {
-      return {
-        quizItems: [...prevState.quizItems, newQuiz],
-      };
-    });
+  addQuiz = async newQuiz => {
+    try {
+        const createdQuiz = await createQuiz(newQuiz);
+        this.setState(prevState =>({
+          quizItems: [...prevState.quizItems, createdQuiz],
+        }));
+    } catch (error) {
+      console.log(error)
+    }
+  
   };
 
   getVisibleQuizItems = () => {
@@ -103,8 +120,8 @@ export class App extends Component {
          
   }
   render() {
-    console.log('render')
-    const { filters } = this.state;
+    // console.log('render')
+    const { filters, loading } = this.state;
 
     const visibleQuizItems = this.getVisibleQuizItems();
     return (
@@ -117,7 +134,11 @@ export class App extends Component {
           onReset={this.resetFilters}
         />
         <QuizForm onAdd={this.addQuiz} />
-        <QuizList items={visibleQuizItems} onDelete={this.handleDelete} />
+        {loading ? (
+          <div>LOADING...</div>
+        ) : (
+          <QuizList items={visibleQuizItems} onDelete={this.handleDelete} />
+        )}
         {/* <IconButton variant="primary" size="sm">
         <HiAcademicCap />
       </IconButton> */}

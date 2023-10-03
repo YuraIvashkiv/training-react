@@ -1,6 +1,6 @@
+import { useState } from 'react';
 import Modal from 'react-modal';
 import { Text, Topic, Wrapper } from './QuizCard.styled';
-import { Component } from 'react';
 
 const customStyles = {
   content: {
@@ -15,50 +15,40 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-export class QuizCard extends Component {
+export const QuizCard = ({
+  item: { id, topic, level, time, questions },
+  onClick,
+}) => {
 
-  state = {
-    isModalOpen: false,
-  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+ 
 
-  openModal =()=> this.setState ({isModalOpen: true}) ;
 
-closeModal =()=>  this.setState({ isModalOpen: false });
+  return (
+    <Wrapper>
+      <Topic onClick={() => setIsModalOpen(true)}>{topic}</Topic>
+      <Text>
+        <b>Level:</b> {level}
+      </Text>
+      <p>
+        <b>Time:</b> {time} min
+      </p>
+      <p>
+        <b>Questions:</b> {questions}
+      </p>
+      <div>
+        <button onClick={() => onClick(id)}>Delete</button>
+        {/* <button onClick={onClick}>Delete</button> */}
+      </div>
 
-  
-  render() {
-    const {
-      item: { id, topic, level, time, questions },
-      onClick,
-    } = this.props;
-   return (
-     <Wrapper>
-       <Topic onClick={this.openModal}>{topic}</Topic>
-       <Text>
-         <b>Level:</b> {level}
-       </Text>
-       <p>
-         <b>Time:</b> {time} min
-       </p>
-       <p>
-         <b>Questions:</b> {questions}
-       </p>
-       <div>
-         <button onClick={() => onClick(id)}>Delete</button>
-         {/* <button onClick={onClick}>Delete</button> */}
-       </div>
-
-       <Modal
-         isOpen={this.state.isModalOpen}
-         onRequestClose={this.closeModal}
-         style={customStyles}
-                >
-         <h1>{topic}</h1>
-         <button onClick={this.closeModal}>close</button>
-       </Modal>
-     </Wrapper>
-   );
-}
-
- }
-
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        style={customStyles}
+      >
+        <h1>{topic}</h1>
+        <button onClick={() => setIsModalOpen(false)}>close</button>
+      </Modal>
+    </Wrapper>
+  );
+};

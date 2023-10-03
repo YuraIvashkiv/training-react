@@ -2,155 +2,145 @@ import { QuizList } from './QuizList/QuizList';
 import { SearchBar } from './SearchBar/SearchBar';
 import { GlobalStyle } from './GlobalStyle';
 import { Layout } from './Layout';
-import { Component } from 'react';
 import { QuizForm } from './QuizForm/QuizForm';
 import { createQuiz, deleteQuiz, fetchQuizzes } from 'api';
+import { useEffect, useState } from 'react';
 // import { HiAcademicCap, HiAdjustments, HiArchive } from 'react-icons/hi';
 // import { IconButton } from './IconButton/IconButton';
 
 // Монтує-> Розмонтовує-> Монтує
-export class App extends Component {
-  state = {
-    quizItems: [],
-    filters: {
-      topic: '',
-      level: 'all',
-      loading: false
-    },
-  };
 
-  async componentDidMount() { 
-    // console.log('componentDidMount');
+const getInitialFilters = () => {
     const savedFilters = localStorage.getItem('quizFilters');
     if (savedFilters !== null) {
-      JSON.parse(savedFilters);
-      this.setState({
-        filters: JSON.parse(savedFilters),
-      })
+     return  JSON.parse(savedFilters);
+    } return {
+      topic: '',
+      level: 'all',
+      loading: false,
     };
-try {
-   this.setState({ loading: true });
-   const quizItems = await fetchQuizzes();
-   this.setState({ quizItems, loading: false, });
-} catch (error) {
-  console.log(error)
-} 
-};
+   }
+export const App = () => {
+  const [quizItems, setQuizItems] = useState([]);
+  const [filters, setFilters] = useState(getInitialFilters);
 
-  componentDidUpdate(prevProps, prevState) { 
-    if (prevState.filters !== this.state.filters) {
-  localStorage.setItem('quizFilters', JSON.stringify(this.state.filters));
-      
-    }
-  };
-
-  resetFilters = () => {
-    this.setState({
-      filters: {
-        topic: '',
-        level: 'all',
-      },
-    });
-  }
-
-  changeTopicFilter = newTopic => {
-    this.setState(prevState => {
-      return {
-        filters: { ...prevState.filters, topic: newTopic },
-      };
-    });
-  };
-
-  changeLevelFilter = newlevel => {
-    this.setState(prevState => {
-      return {
-        filters: {
-          ...prevState.filters,
-          level: newlevel,
-        },
-      };
-    });
-  };
-
-  handleDelete = async quizId => {
-    try {
-       const deletedQuiz = await deleteQuiz(quizId);
-
-       this.setState(prevState => ({
-           quizItems: prevState.quizItems.filter(
-             quiz => quiz.id !== deletedQuiz.id
-           ),
-         }));
-    } catch (error) {
-      console.log(error)
-    }
-   
-  };
-
-  addQuiz = async newQuiz => {
-    try {
-        const createdQuiz = await createQuiz(newQuiz);
-        this.setState(prevState =>({
-          quizItems: [...prevState.quizItems, createdQuiz],
+//  fetch даних з бекенду
+  useEffect(() => {
+    async function getQuizzes() {
+      try {
+        setFilters(prevFilters => ({
+          ...prevFilters,
+          loading: true,
         }));
-    } catch (error) {
-      console.log(error)
-    }
+        const quizItems = await fetchQuizzes();
+        setQuizItems(quizItems);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setFilters((prevFilters) => ({
+          ...prevFilters,
+          loading: false,
+        }));
+      }
+    };
+    getQuizzes();
+  }
+    , []);
+
   
+ // Запис фільтів у local Storage
+  useEffect(() => {
+    console.log('[filters]')
+    localStorage.setItem('quizFilters', JSON.stringify(filters));
+  }, [filters]);
+  
+  const resetFilters = () => {
+    setFilters({
+      topic: '',
+      level: 'all',
+      loading: false,
+    });
   };
 
-  getVisibleQuizItems = () => {
-    const { quizItems, filters } = this.state
+  const changeTopicFilter = newTopic => {
+    setFilters(prevState => ({
+      ...prevState,
+      topic: newTopic,
+    }));
+  };
+
+  const changeLevelFilter = newlevel => {
+    setFilters(prevState => ({
+      ...prevState,
+      level: newlevel,
+    }));
+  };
+
+  const addQuiz = async newQuiz => {
+    try {
+      const createdQuiz = await createQuiz(newQuiz);
+      setQuizItems(prevState => [...prevState, createdQuiz]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const  deleteQuiz = async quizId => {
+     try {
+       const deletedQuiz = await deleteQuiz(quizId);
+       setQuizItems(prevState =>
+  prevState.quizItems.filter(
+           quiz => quiz.id !== deletedQuiz.id
+         ))
+    
+     } catch (error) {
+       console.log(error);
+     }
+   };
+
+
+  const getVisibleQuizItems = () => {
     const lowercaseTopic = filters.topic.toLowerCase();
 
-        return  quizItems.filter(
-      quiz => {
-        const hasTopic = quiz.topic.toLowerCase().includes(lowercaseTopic);
+    return quizItems.filter(quiz => {
+      const hasTopic = quiz.topic.toLowerCase().includes(lowercaseTopic);
 
       //   quiz.topic.toLowerCase().includes(filters.topic.toLowerCase()) &&
       // quiz.level === filters.level
-              if (filters.level === 'all') {
-          return (
-            hasTopic
-          );
-        };
-        return hasTopic && quiz.level === filters.level;
-        }
-    );
-         
-  }
-  render() {
-    // console.log('render')
-    const { filters, loading } = this.state;
+      if (filters.level === 'all') {
+        return hasTopic;
+      }
+      return hasTopic && quiz.level === filters.level;
+    });
+  };
 
-    const visibleQuizItems = this.getVisibleQuizItems();
-    return (
-      <Layout>
-        <SearchBar
-          topicFilter={filters.topic}
-          levelFilter={filters.level}
-          onChangeTopic={this.changeTopicFilter}
-          onChangeLevel={this.changeLevelFilter}
-          onReset={this.resetFilters}
-        />
-        <QuizForm onAdd={this.addQuiz} />
-        {loading ? (
-          <div>LOADING...</div>
-        ) : (
-          <QuizList items={visibleQuizItems} onDelete={this.handleDelete} />
-        )}
-        {/* <IconButton variant="primary" size="sm">
+  const visibleQuizItems = getVisibleQuizItems();
+  return (
+    <Layout>
+      <SearchBar
+        topicFilter={filters.topic}
+        levelFilter={filters.level}
+        onChangeTopic={changeTopicFilter}
+        onChangeLevel={changeLevelFilter}
+        onReset={resetFilters}
+      />
+      <QuizForm onAdd={addQuiz} />
+      {filters.loading ? (
+        <div>LOADING...</div>
+      ) : (
+        <QuizList items={visibleQuizItems} onDelete={deleteQuiz} />
+      )}
+      {/* <IconButton variant="primary" size="sm">
         <HiAcademicCap />
       </IconButton> */}
-        {/* <IconButton variant="secondary" size="md">
+      {/* <IconButton variant="secondary" size="md">
         <HiArchive />
       </IconButton> */}
-        {/* <IconButton variant="secondary" size="lg">
+      {/* <IconButton variant="secondary" size="lg">
         <HiAdjustments size={40} color="orange" />
         <HiAdjustments />
       </IconButton> */}
-        <GlobalStyle />
-      </Layout>
-    );
-  }
-}
+      <GlobalStyle />
+    </Layout>
+  );
+};

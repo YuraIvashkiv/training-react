@@ -1,4 +1,4 @@
-const { useState, useEffect } = require('react');
+import React, { useState, useEffect } from 'react';
 
 const ImageApp = () => {
   const [query, setQuery] = useState('');

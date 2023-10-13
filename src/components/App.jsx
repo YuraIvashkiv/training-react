@@ -11,20 +11,21 @@ import { useEffect, useState } from 'react';
 // Монтує-> Розмонтовує-> Монтує
 
 const getInitialFilters = () => {
-    const savedFilters = localStorage.getItem('quizFilters');
-    if (savedFilters !== null) {
-     return  JSON.parse(savedFilters);
-    } return {
-      topic: '',
-      level: 'all',
-      loading: false,
-    };
-   }
+  const savedFilters = localStorage.getItem('quizFilters');
+  if (savedFilters !== null) {
+    return JSON.parse(savedFilters);
+  }
+  return {
+    topic: '',
+    level: 'all',
+    loading: false,
+  };
+};
 export const App = () => {
   const [quizItems, setQuizItems] = useState([]);
   const [filters, setFilters] = useState(getInitialFilters);
 
-//  fetch даних з бекенду
+  //  fetch даних з бекенду
   useEffect(() => {
     async function getQuizzes() {
       try {
@@ -37,23 +38,20 @@ export const App = () => {
       } catch (error) {
         console.log(error);
       } finally {
-        setFilters((prevFilters) => ({
+        setFilters(prevFilters => ({
           ...prevFilters,
           loading: false,
         }));
       }
-    };
+    }
     getQuizzes();
-  }
-    , []);
+  }, []);
 
-  
- // Запис фільтів у local Storage
+  // Запис фільтів у local Storage
   useEffect(() => {
-    console.log('[filters]')
     localStorage.setItem('quizFilters', JSON.stringify(filters));
   }, [filters]);
-  
+
   const resetFilters = () => {
     setFilters({
       topic: '',
@@ -85,19 +83,16 @@ export const App = () => {
     }
   };
 
-  const  deleteQuiz = async quizId => {
-     try {
-       const deletedQuiz = await deleteQuiz(quizId);
-       setQuizItems(prevState =>
-  prevState.quizItems.filter(
-           quiz => quiz.id !== deletedQuiz.id
-         ))
-    
-     } catch (error) {
-       console.log(error);
-     }
-   };
-
+  const deleteQuiz = async quizId => {
+    try {
+      const deletedQuiz = await deleteQuiz(quizId);
+      setQuizItems(prevState =>
+        prevState.quizItems.filter(quiz => quiz.id !== deletedQuiz.id)
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const getVisibleQuizItems = () => {
     const lowercaseTopic = filters.topic.toLowerCase();

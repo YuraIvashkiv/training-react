@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider } from 'styled-components';
 import { App } from 'components/App';
+import { BrowserRouter } from 'react-router-dom';
 // import { StateExample } from 'components/StateExample/StateExample';
 
 const theme = {
@@ -16,8 +17,10 @@ const theme = {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ThemeProvider theme={ theme }>
+    <ThemeProvider theme={theme}>
+      {/* <BrowserRouter  basename="/training-react"> */}
       <App />
+      {/* </BrowserRouter> */}
       {/* <StateExample/> */}
     </ThemeProvider>
   </React.StrictMode>

@@ -85,9 +85,9 @@ export const App = () => {
 
   const deleteQuiz = async quizId => {
     try {
-      const deletedQuiz = await deleteQuiz(quizId);
+      const deletedQuizResult = await deleteQuiz(quizId);
       setQuizItems(prevState =>
-        prevState.quizItems.filter(quiz => quiz.id !== deletedQuiz.id)
+        prevState.quizItems.filter(quiz => quiz.id !== deletedQuizResult.id)
       );
     } catch (error) {
       console.log(error);

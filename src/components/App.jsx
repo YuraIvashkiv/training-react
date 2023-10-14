@@ -3,7 +3,7 @@ import { SearchBar } from './SearchBar/SearchBar';
 import { GlobalStyle } from './GlobalStyle';
 import { Layout } from './Layout';
 import { QuizForm } from './QuizForm/QuizForm';
-import { createQuiz, deleteQuiz, fetchQuizzes } from 'api';
+import { createQuiz, deleteQuizApi, fetchQuizzes } from 'api';
 import { useEffect, useState } from 'react';
 // import { HiAcademicCap, HiAdjustments, HiArchive } from 'react-icons/hi';
 // import { IconButton } from './IconButton/IconButton';
@@ -85,7 +85,7 @@ export const App = () => {
 
   const deleteQuiz = async quizId => {
     try {
-      const deletedQuizResult = await deleteQuiz(quizId);
+      const deletedQuizResult = await deleteQuizApi(quizId);
       setQuizItems(prevState =>
         prevState.quizItems.filter(quiz => quiz.id !== deletedQuizResult.id)
       );
